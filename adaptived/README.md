@@ -1,3 +1,4 @@
+
 Adaptived is a simple cause-and-effect daemon for the Linux operating system.  It
 is designed to allow a user to construct a series of rules to automate tasks.
 
