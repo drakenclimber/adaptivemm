@@ -29,7 +29,7 @@ on: ["push", "pull_request"]
 
 jobs:
   was-modified:
-    name: Was adaptivemm or adaptivedM mdified?
+    name: Was adaptivemm or adaptived modified?
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read
@@ -59,8 +59,11 @@ jobs:
 
   # If there was a change to adaptived, then adaptivemm should be unmodified
   adaptivemm-unchanged:
+    name: Adaptivemm should be unchanged if this patch has adaptived commits
     needs: was-modified
-    if: ${{ needs.was-modified.outputs.adaptived == 'true' }}
+    if: |
+      github.event_name == 'pull_request'
+      ${{ needs.was-modified.outputs.adaptived == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -68,8 +71,19 @@ jobs:
         run: |
           make
           sha256sum -b adaptivemmd > adaptivemmd.SHA256
+
+      - name: Show GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
       - name: Check out the commit prior to this change
-        run: git checkout ${{ github.event.pull_request.base.sha }}
+        env:
+          COMMIT_COUNT: ${{ github.event.commits }}
+        run: |
+          git fetch origin
+          git checkout HEAD~$COMMIT_COUNT
+
       - name: Build the previous adaptivemm executable
         run: |
           make
