@@ -8,6 +8,7 @@ SOURCES = \
 	causes/always.c \
 	causes/cgroup_setting.c \
 	causes/days_of_the_week.c \
+	causes/example_cause.c \
 	causes/meminfo.c \
 	causes/memorystat.c \
 	causes/periodic.c \
@@ -22,6 +23,7 @@ SOURCES = \
 	effects/cgroup_setting.c \
 	effects/cgroup_setting_by_psi.c \
 	effects/copy_cgroup_setting.c \
+	effects/example_effect.c \
 	effects/kill_cgroup.c \
 	effects/kill_cgroup_by_psi.c \
 	effects/kill_processes.c \

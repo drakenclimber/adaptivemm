@@ -55,6 +55,7 @@ const char * const cause_names[] = {
 	"memory.stat",
 	"top",
 	"cgroup_memory_setting",
+	"example_cause"
 };
 static_assert(ARRAY_SIZE(cause_names) == CAUSE_CNT,
 	      "cause_names[] must be same length as CAUSE_CNT");
@@ -81,6 +82,7 @@ const struct adaptived_cause_functions cause_fns[] = {
 	{memorystat_init, memorystat_main, memorystat_exit},
 	{top_init, top_main, top_exit},
 	{cgset_memory_init, cgset_memory_main, cgset_exit},
+	{example_cause_init, example_cause_main, example_cause_exit},
 };
 static_assert(ARRAY_SIZE(cause_fns) == CAUSE_CNT,
 	      "cause_fns[] must be same length as CAUSE_CNT");

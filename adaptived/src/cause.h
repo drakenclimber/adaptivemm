@@ -63,6 +63,7 @@ enum cause_enum {
 	MEMORYSTAT,
 	TOP,
 	CGROUP_MEMORY_SETTING,
+	EXAMPLE_CAUSE,
 
 	CAUSE_CNT
 };
@@ -82,6 +83,14 @@ struct adaptived_cause {
 extern const char * const cause_names[];
 extern const struct adaptived_cause_functions cause_fns[];
 extern struct adaptived_cause *registered_causes;
+
+/*
+ * Setters and getters for reading and writing cause data
+ */
+
+int example_cause_get_value(const struct adaptived_cause * const cse, int * const value);
+int example_cause_set_value(const struct adaptived_cause * const cse, int value);
+
 
 
 int time_of_day_init(struct adaptived_cause * const cse, struct json_object *args_obj, int interval);
@@ -137,5 +146,9 @@ void memorystat_exit(struct adaptived_cause * const cse);
 int top_init(struct adaptived_cause * const cse, struct json_object *args_obj, int interval);
 int top_main(struct adaptived_cause * const cse, int time_since_last_run);
 void top_exit(struct adaptived_cause * const cse);
+
+int example_cause_init(struct adaptived_cause * const cse, struct json_object *args_obj, int interval);
+int example_cause_main(struct adaptived_cause * const cse, int time_since_last_run);
+void example_cause_exit(struct adaptived_cause * const cse);
 
 #endif /* __ADAPTIVED_CAUSE_H */

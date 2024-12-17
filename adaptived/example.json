@@ -1,0 +1,23 @@
+{
+	"rules": [
+		{
+			"name": "Sharing data between causes and effects",
+			"causes": [
+				{
+					"name": "example_cause",
+					"args": {
+						"value": 7
+					}
+				}
+			],
+			"effects": [
+				{
+					"name": "example_effect",
+					"args": {
+						"increment": 2
+					}
+				}
+			]
+		}
+	]
+}
