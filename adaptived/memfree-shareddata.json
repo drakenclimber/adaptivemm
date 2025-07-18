@@ -1,0 +1,27 @@
+{
+	"rules": [
+		{
+			"name": "Print MemFree Shared Info",
+			"causes": [
+				{
+					"name": "meminfo",
+					"args": {
+						"field": "MemFree",
+						"threshold": "100K",
+						"operator": "greaterthan",
+						"share": true
+					}
+				}
+			],
+			"effects": [
+				{
+					"name": "print",
+					"args": {
+						"file": "stdout",
+						"share": true
+					}
+				}
+			]
+		}
+	]
+}

@@ -204,6 +204,15 @@ API void free_shared_data(struct adaptived_cause * const cse, bool force_delete)
 			adaptived_free_cgroup_value(cur->data);
 			free(cur->data);
 			break;
+		case ADAPTIVED_SDATA_NAME_VALUE:
+			struct adaptived_name_and_value *name_value;
+
+			name_value = (struct adaptived_name_and_value *)cur->data;
+
+			free(name_value->name);
+			adaptived_free_cgroup_value(name_value->value);
+			free(cur->data);
+			break;
 		default:
 			free(cur->data);
 			break;

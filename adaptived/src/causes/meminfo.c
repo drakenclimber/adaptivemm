@@ -41,6 +41,7 @@ struct meminfo_opts {
 	char *meminfo_file;
 	char *field;
 	struct adaptived_cgroup_value threshold;
+	bool share_data;
 };
 
 static void free_opts(struct meminfo_opts * const opts)
@@ -113,6 +114,15 @@ int meminfo_init(struct adaptived_cause * const cse, struct json_object *args_ob
 
 	opts->threshold.type = ADAPTIVED_CGVAL_LONG_LONG;
 
+	ret = adaptived_parse_bool(args_obj, "share", &opts->share_data);
+	if (ret == -ENOENT) {
+		opts->share_data = false;
+		ret = 0;
+	} else if (ret) {
+		adaptived_err("Failed to parse share arg: %d\n", ret);
+		goto error;
+	}
+
 	ret = adaptived_cause_set_data(cse, (void *)opts);
 	if (ret)
 		goto error;
@@ -121,6 +131,52 @@ int meminfo_init(struct adaptived_cause * const cse, struct json_object *args_ob
 
 error:
 	free_opts(opts);
+	return ret;
+}
+
+int share_data(struct adaptived_cause * const cse, const char * const field_name,
+	       long long field_value)
+{
+	struct adaptived_name_and_value *name_value = NULL;
+	struct adaptived_cgroup_value *value = NULL;
+	char *name = NULL;
+	int ret;
+
+	name_value = (struct adaptived_name_and_value *)malloc(
+			sizeof(struct adaptived_name_and_value));
+	if (name_value == NULL)
+		return -ENOMEM;
+
+	name = strdup(field_name);
+	if (name == NULL) {
+		ret = -ENOMEM;
+		goto error;
+	}
+
+	value = (struct adaptived_cgroup_value *)malloc(sizeof(struct adaptived_cgroup_value));
+	if (value == NULL) {
+		ret = -ENOMEM;
+		goto error;
+	}
+
+	value->type = ADAPTIVED_CGVAL_LONG_LONG;
+	value->value.ll_value = field_value;
+
+	name_value->name = name;
+	name_value->value = value;
+
+	ret = adaptived_write_shared_data(cse, ADAPTIVED_SDATA_NAME_VALUE, name_value, 0);
+
+	return ret;
+
+error:
+	if (name_value)
+		free(name_value);
+	if (value)
+		free(value);
+	if (name)
+		free(name);
+
 	return ret;
 }
 
@@ -133,6 +189,12 @@ int meminfo_main(struct adaptived_cause * const cse, int time_since_last_run)
 	ret = adaptived_get_meminfo_field(opts->meminfo_file, opts->field, &ll_value);
 	if (ret)
 		return ret;
+
+	if (opts->share_data) {
+		ret = share_data(cse, opts->field, ll_value);
+		if (ret)
+			return ret;
+	}
 
 	switch (opts->op) {
 	case COP_GREATER_THAN:

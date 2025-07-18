@@ -71,6 +71,7 @@ enum adaptived_sdata_type {
 	ADAPTIVED_SDATA_CUSTOM = 0,
 	ADAPTIVED_SDATA_STR,
 	ADAPTIVED_SDATA_CGROUP,
+	ADAPTIVED_SDATA_NAME_VALUE,
 
 	ADAPTIVED_SDATA_CNT
 };
@@ -103,6 +104,11 @@ struct adaptived_cgroup_value {
 		long long ll_value;
 		float float_value;
 	} value;
+};
+
+struct adaptived_name_and_value {
+	char *name;
+	struct adaptived_cgroup_value *value;
 };
 
 struct adaptived_rule_stats {
