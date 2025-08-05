@@ -68,6 +68,31 @@ AC_CHECK_LIB([json-c], [json_object_object_get_ex], [],
 AC_CHECK_HEADERS([json-c/json.h], [],
 		 [AC_MSG_ERROR([please install the json-c development package])])
 
+AC_ARG_ENABLE([restserver],
+	      [AS_HELP_STRING([--enable-restserver],[enable rest server [default=yes]])],
+	      [
+			if test "x$enableval" = xno; then
+				with_restserver=false
+			else
+				with_restserver=true
+			fi
+	      ],
+	      [with_restserver=true])
+AM_CONDITIONAL([WITH_RESTSERVER], [test x$with_restserver = xtrue])
+
+if test x$with_restserver = xtrue; then
+	AC_CHECK_LIB([microhttpd],
+		     [MHD_queue_response],
+		     [],
+		     [AC_MSG_ERROR([Cannot compile rest server support without
+		     libmicrohttpd!])])
+
+	AC_CHECK_HEADERS([microhttpd.h],
+			 [],
+			 [AC_MSG_ERROR([Cannot compile rest server support -
+			 missing libmicrohttpd header files!])])
+fi
+
 LT_INIT
 
 dnl #
