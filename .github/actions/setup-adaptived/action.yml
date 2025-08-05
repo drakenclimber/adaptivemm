@@ -18,7 +18,7 @@ runs:
     shell: bash
   - run: |
       while sudo fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock >/dev/null 2>&1; do sleep 3; done
-      sudo apt-get install libjson-c-dev lcov cmake bison flex autoconf automake libtool libsystemd-dev -y
+      sudo apt-get install libjson-c-dev lcov cmake bison flex autoconf automake libtool libsystemd-dev libmicrohttpd-dev -y
     shell: bash
   - run: cd adaptived && ./autogen.sh
     shell: bash
