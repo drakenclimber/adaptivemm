@@ -554,6 +554,15 @@ int adaptived_get_shared_data(const struct adaptived_cause * const cse, int inde
 			      enum adaptived_sdata_type * const type, void **data,
 			      uint32_t * const flags);
 
+/**
+ * Convert the shared data in this cause into a JSON object
+ * @param cse adaptived cause
+ * @param field Optional parameter to only produce JSON for the specified field
+ * @param json_obj Output pointer to the generated JSON
+ */
+int adaptived_sdata_to_json(struct adaptived_cause * const cse,
+			    const char * const field, struct json_object **json_obj);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
