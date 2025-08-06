@@ -62,6 +62,7 @@ const char * const effect_names[] = {
 	"sd_bus_setting",
 	"kill_processes",
 	"signal",
+	"rest_server",
 };
 static_assert(ARRAY_SIZE(effect_names) == EFFECT_CNT,
 	      "effect_names[] must be same length as EFFECT_CNT");
@@ -82,6 +83,7 @@ const struct adaptived_effect_functions effect_fns[] = {
 	{sd_bus_setting_init, sd_bus_setting_main, sd_bus_setting_exit},
 	{kill_processes_init, kill_processes_main, kill_processes_exit},
 	{signal_init, signal_main, signal_exit},
+	{rest_server_init, rest_server_main, rest_server_exit},
 };
 static_assert(ARRAY_SIZE(effect_fns) == EFFECT_CNT,
 	      "effect_fns[] must be same length as EFFECT_CNT");
