@@ -27,7 +27,8 @@ gtest_SOURCES = gtest.cpp \
 		009-cgroup_detect.cpp \
 		010-adaptived_get_schedstats.cpp \
 		011-kill_processes_sort.cpp \
-		012-shared_data.cpp
+		012-shared_data.cpp \
+		013-shared_data_json.cpp
 
 gtest_LDFLAGS = -L$(top_srcdir)/googletest/googletest -l:libgtest.so \
 		-rpath $(abs_top_srcdir)/googletest/googletest
