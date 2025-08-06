@@ -29,6 +29,7 @@ SOURCES = \
 	effects/logger.c \
 	effects/print.c \
 	effects/print_schedstat.c \
+	effects/rest_server.c \
 	effects/sd_bus_setting.c \
 	effects/snooze.c \
 	effects/validate.c \
@@ -62,6 +63,14 @@ libadaptived_la_CFLAGS = ${AM_CFLAGS} ${CFLAGS} ${CODE_COVERAGE_CFLAGS} -fPIC \
 libadaptived_la_LDFLAGS = ${AM_LDFLAGS} ${CODE_COVERAGE_LDFLAGS} ${LDFLAGS} \
 		       -version-number ${VERSION_MAJOR}:${VERSION_MINOR}:${VERSION_MICRO}
 lib_LTLIBRARIES = libadaptived.la
+
+if WITH_RESTSERVER
+	adaptived_CFLAGS += -DWITH_RESTSERVER
+	adaptived_LDFLAGS += -lmicrohttpd
+
+	libadaptived_la_CFLAGS += -DWITH_RESTSERVER
+	libadaptived_la_LDFLAGS += -lmicrohttpd
+endif
 
 check-build:
 	${MAKE} ${AM_MAKEFLAGS} ${check_PROGRAMS}
