@@ -86,6 +86,149 @@ error:
 	return ret;
 }
 
+static int insert_into_field_obj(struct json_object * const parent_obj, const char * const field,
+				 const char * const key, struct json_object * const insert_obj)
+{
+	struct json_object *field_obj;
+	json_bool exists;
+	int ret;
+
+	exists = json_object_object_get_ex(parent_obj, field, &field_obj);
+	if (!exists || !field_obj)
+		/*
+		 * The field object doesn't exist.  We'll create a local one
+		 * then add it at the end
+		 */
+		field_obj = json_object_new_object();
+
+	ret = json_object_object_add(field_obj, key, insert_obj);
+	if (ret) {
+		adaptived_err("Failed to add key %s to %s object\n", field, key);
+		return ret;
+	}
+
+	if (!exists) {
+		ret = json_object_object_add(parent_obj, field, field_obj);
+		if (ret) {
+			adaptived_err("Failed to add %s object\n", field);
+			return ret;
+		}
+	}
+
+	return 0;
+}
+
+static int cgroup_setting_value_to_json(struct json_object * const parent_obj,
+					const char * const setting,
+					const struct adaptived_cgroup_setting_and_value * const data)
+{
+	struct json_object *value_obj = NULL;
+	const char *field;
+	int ret;
+
+	if (setting && strcmp(setting, data->setting) != 0)
+		/*
+		 * A specific cgroup setting was requested, but this shared data
+		 * object contains a different setting.  Skip it
+		 */
+		return 0;
+
+	if (setting)
+		field = setting;
+	else
+		field = data->setting;
+
+	switch(data->value->type) {
+	case ADAPTIVED_CGVAL_STR:
+		value_obj = json_object_new_string(data->value->value.str_value);
+		break;
+	case ADAPTIVED_CGVAL_LONG_LONG:
+		value_obj = json_object_new_int(data->value->value.ll_value);
+		break;
+	case ADAPTIVED_CGVAL_FLOAT:
+		value_obj = json_object_new_double(data->value->value.float_value);
+		break;
+	default:
+		ret = -EINVAL;
+		goto err;
+	}
+	if (!value_obj) {
+		ret = -EINVAL;
+		goto err;
+	}
+
+	ret = insert_into_field_obj(parent_obj, field, data->cgroup_name, value_obj);
+	if (ret)
+		goto err;
+
+	return ret;
+
+err:
+	if (value_obj)
+		json_object_put(value_obj);
+
+	return ret;
+}
+
+API int adaptived_sdata_to_json(struct adaptived_cause * const cse,
+				const char * const field, struct json_object **json_obj)
+{
+	struct json_object *parent_obj = NULL;
+	enum adaptived_sdata_type stype;
+	struct shared_data *cur;
+	int ret;
+
+	if (!cse || !json_obj)
+		return -EINVAL;
+
+	if ((*json_obj) != NULL)
+		return -EINVAL;
+
+	if (!cse->sdata)
+		return -ENODATA;
+
+	parent_obj = json_object_new_object();
+	if (!parent_obj)
+		return -ENOMEM;
+
+	cur = cse->sdata;
+	stype = cur->type;
+
+	while (cur) {
+		if (cur->type != stype) {
+			/*
+			 * We currently can only convert the same shared data
+			 * type in a single json object.
+			 */
+			ret = -ENOTSUP;
+			goto err;
+		}
+
+		switch(cur->type) {
+		case ADAPTIVED_SDATA_CGROUP_SETTING_VALUE:
+			ret = cgroup_setting_value_to_json(parent_obj, field, cur->data);
+			if (ret)
+				goto err;
+			break;
+		default:
+			ret = -ENOTSUP;
+			goto err;
+		}
+
+		cur = cur->next;
+	}
+
+	*json_obj = parent_obj;
+
+	return ret;
+
+err:
+	if (parent_obj)
+		json_object_put(parent_obj);
+
+	return ret;
+}
+
 /*
  * Method for a cause to share data with effect(s) in the same rule.
  *
