@@ -34,6 +34,7 @@
 #include <adaptived.h>
 
 #include "adaptived-internal.h"
+#include "shared_data.h"
 #include "defines.h"
 
 static const char * const slash_path = "/";
@@ -232,7 +233,8 @@ static int read_settings(struct adaptived_cause * const cse, struct cgroup_data_
 			sdata_path = cg_path;
 		}
 
-		ret = write_sdata_cgroup_setting_value(cse, sdata_path, opts->settings[i], &val, 0);
+		ret = write_sdata_cgroup_setting_value(cse, sdata_path, opts->settings[i], &val,
+						       ADAPTIVED_SDATAF_PERSIST);
 		if (ret)
 			goto error;
 
@@ -253,6 +255,8 @@ int cgroup_data_main(struct adaptived_cause * const cse, int time_since_last_run
 	struct adaptived_path_walk_handle *handle = NULL;
 	char *cur_path = NULL;
 	int ret;
+
+	free_shared_data(cse, true);
 
 	ret = adaptived_path_walk_start(opts->cgroup_path, &handle,
 					ADAPTIVED_PATH_WALK_LIST_DIRS, opts->max_depth);
