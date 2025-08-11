@@ -9,6 +9,7 @@ SOURCES = \
 	causes/cgroup_data.c \
 	causes/cgroup_setting.c \
 	causes/days_of_the_week.c \
+	causes/kernel_data.c \
 	causes/meminfo.c \
 	causes/memorystat.c \
 	causes/periodic.c \
