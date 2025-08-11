@@ -132,6 +132,7 @@ int main(int argc, char *argv[])
 		 argv[1]);
 	config_path[FILENAME_MAX - 1] = '\0';
 
+	fprintf(stderr, "%s:%d\n", __func__, __LINE__);
 	ctx = adaptived_init(config_path);
 	if (!ctx)
 		return AUTOMAKE_HARD_ERROR;
@@ -139,12 +140,14 @@ int main(int argc, char *argv[])
 	ret = create_dirs(cgroup_dirs, cgroup_dirs_cnt);
 	if (ret)
 		goto err;
+	fprintf(stderr, "%s:%d\n", __func__, __LINE__);
 
 	write_cgroup_files();
 
 	ret = adaptived_set_attr(ctx, ADAPTIVED_ATTR_MAX_LOOPS, 1);
 	if (ret)
 		goto err;
+	fprintf(stderr, "%s:%d\n", __func__, __LINE__);
 	ret = adaptived_set_attr(ctx, ADAPTIVED_ATTR_INTERVAL, 1234);
 	if (ret)
 		goto err;
@@ -154,12 +157,14 @@ int main(int argc, char *argv[])
 	ret = adaptived_set_attr(ctx, ADAPTIVED_ATTR_LOG_LEVEL, LOG_EMERG);
 	if (ret)
 		goto err;
+	fprintf(stderr, "%s:%d\n", __func__, __LINE__);
 
 	ret = adaptived_loop(ctx, true);
 	if (ret != EXPECTED_RET) {
 		adaptived_err("Test 071 returned: %d, expected: %d\n", ret, EXPECTED_RET);
 		goto err;
 	}
+	fprintf(stderr, "%s:%d\n", __func__, __LINE__);
 
 	adaptived_release(&ctx);
 	ctx = NULL;
@@ -167,9 +172,11 @@ int main(int argc, char *argv[])
 	snprintf(expected_file, FILENAME_MAX - 1, "%s/071-cause-cgroup_data.expected", argv[1]);
 	expected_file[FILENAME_MAX - 1] = '\0';
 
+	fprintf(stderr, "%s:%d\n", __func__, __LINE__);
 	ret = compare_files("071-cause-cgroup_data.out", expected_file);
 	if (ret)
 		goto err;
+	fprintf(stderr, "%s:%d\n", __func__, __LINE__);
 
 	delete_file("071-cause-cgroup_data.out");
 	delete_files(cgroup_files, cgroup_files_cnt);

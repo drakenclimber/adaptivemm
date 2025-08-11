@@ -79,17 +79,20 @@ int compare_files(const char * const file1, const char * const file2)
 	int fd1 = 0, fd2 = 0;
 	int ret;
 
+	fprintf(stderr, "%s:%d\n", __func__, __LINE__);
 	fd1 = open(file1, O_RDONLY);
 	if (fd1 < 0) {
 		ret = -errno;
 		goto err;
 	}
+	fprintf(stderr, "%s:%d\n", __func__, __LINE__);
 
 	fd2 = open(file2, O_RDONLY);
 	if (fd2 < 0) {
 		ret = -errno;
 		goto err;
 	}
+	fprintf(stderr, "%s:%d\n", __func__, __LINE__);
 
 	do {
 		memset(f1_buf, 0, sizeof(f1_buf));
@@ -97,11 +100,14 @@ int compare_files(const char * const file1, const char * const file2)
 
 		f1_sz = read(fd1, f1_buf, sizeof(f1_buf));
 		f2_sz = read(fd2, f2_buf, sizeof(f2_buf));
+		fprintf(stderr, "%s:%d\n", __func__, __LINE__);
 
 		if (f1_sz != f2_sz) {
+			fprintf(stderr, "%s:%d size\n", __func__, __LINE__);
 			ret = -ENODATA;
 			break;
 		}
+		fprintf(stderr, "%s:%d\n", __func__, __LINE__);
 
 		if (f1_sz == 0) {
 			/*
@@ -114,6 +120,7 @@ int compare_files(const char * const file1, const char * const file2)
 		if (strcmp(f1_buf, f2_buf) != 0) {
 			fprintf(stderr, "f1:\n\t%s\n", f1_buf);
 			fprintf(stderr, "f2:\n\t%s\n", f2_buf);
+			fprintf(stderr, "%s:%d\n", __func__, __LINE__);
 			ret = -ENOSTR;
 			break;
 		}
