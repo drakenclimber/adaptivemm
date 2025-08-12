@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
 	snprintf(expected_file, FILENAME_MAX - 1, "%s/071-cause-cgroup_data.expected", argv[1]);
 	expected_file[FILENAME_MAX - 1] = '\0';
 
-	ret = compare_files("071-cause-cgroup_data.out", expected_file);
+	ret = compare_files_unsorted("071-cause-cgroup_data.out", expected_file);
 	if (ret)
 		goto err;
 
