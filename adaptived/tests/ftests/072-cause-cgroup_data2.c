@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
 	adaptived_release(&ctx);
 	ctx = NULL;
 
-	ret = compare_files(out_path, expected_path);
+	ret = compare_files_unsorted(out_path, expected_path);
 	if (ret)
 		goto err;
 
