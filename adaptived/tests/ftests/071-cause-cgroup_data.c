@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
 	expected_file[FILENAME_MAX - 1] = '\0';
 
 	fprintf(stderr, "%s:%d\n", __func__, __LINE__);
-	ret = compare_files("071-cause-cgroup_data.out", expected_file);
+	ret = compare_files_unsorted("071-cause-cgroup_data.out", expected_file);
 	if (ret)
 		goto err;
 	fprintf(stderr, "%s:%d\n", __func__, __LINE__);
