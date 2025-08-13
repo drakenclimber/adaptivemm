@@ -32,6 +32,7 @@
 #include <unistd.h>
 #include <syslog.h>
 #include <assert.h>
+#include <signal.h>
 #include <stdio.h>
 #include <errno.h>
 #include <time.h>
@@ -55,6 +56,8 @@ static_assert(ARRAY_SIZE(log_files) == LOG_LOC_CNT,
 
 static const char * const default_config_file = "/etc/adaptived.json";
 static const int default_interval = 5000; /* milliseconds */
+
+static int sig_received = 0;
 
 static void usage(FILE *fd)
 {
@@ -439,6 +442,41 @@ static void free_rule_shared_data(struct adaptived_rule * const rule, bool force
 	}
 }
 
+static void signal_handler(int signum)
+{
+	sig_received = signum;
+}
+
+static int handle_signal(struct adaptived_ctx * const ctx)
+{
+	switch(sig_received) {
+	case SIGINT:
+	case SIGTERM:
+		return -EINTR;
+	default:
+		return 0;
+	}
+}
+
+static int setup_signal_handling(struct adaptived_ctx * const ctx)
+{
+	struct sigaction sigact;
+	int ret;
+
+	memset(&sigact, 0, sizeof(struct sigaction));
+
+	sigact.sa_handler = &signal_handler;
+	ret = sigaction(SIGINT, &sigact, NULL);
+	if (ret)
+		return ret;
+
+	ret = sigaction(SIGTERM, &sigact, NULL);
+	if (ret)
+		return ret;
+
+	return ret;
+}
+
 API int adaptived_loop(struct adaptived_ctx * const ctx, bool parse)
 {
 	struct adaptived_effect *eff;
@@ -479,8 +517,17 @@ API int adaptived_loop(struct adaptived_ctx * const ctx, bool parse)
 	ctx->loop_cnt = 0;
 	pthread_mutex_unlock(&ctx->ctx_mutex);
 
+	ret = setup_signal_handling(ctx);
+	if (ret)
+		return ret;
+
 	while (1) {
 		pthread_mutex_lock(&ctx->ctx_mutex);
+
+		ret = handle_signal(ctx);
+		if (ret)
+			goto out;
+
 		rule = ctx->rules;
 
 		while (rule) {
