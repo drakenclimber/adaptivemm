@@ -1,0 +1,35 @@
+{
+	"rules": [
+		{
+			"name": "Gather cgroup data and share it via a rest server",
+			"causes": [
+				{
+					"name": "cgroup_data",
+					"args": {
+						"cgroup": "./test073cgroup",
+						"settings": [
+							{
+								"setting": "memory.current"
+							},
+							{
+								"setting": "cpu.uclamp.min"
+							},
+							{
+								"setting": "cpuset.cpus.effective"
+							}
+						]
+					}
+				}
+			],
+			"effects": [
+				{
+					"name": "rest_server",
+					"args": {
+						"endpoint": "cgroup",
+						"port": 12345
+					}
+				}
+			]
+		}
+	]
+}

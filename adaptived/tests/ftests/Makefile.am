@@ -112,6 +112,7 @@ test069_SOURCES = 069-effect-signal.c ftests.c
 test070_SOURCES = 070-rule-multiple_rules.c ftests.c
 test071_SOURCES = 071-cause-cgroup_data.c ftests.c
 test072_SOURCES = 072-cause-cgroup_data2.c ftests.c
+test073_SOURCES = 073-effect-rest_server.c ftests.c
 
 sudo1000_SOURCES = 1000-sudo-effect-sd_bus_setting_set_int.c ftests.c
 sudo1001_SOURCES = 1001-sudo-effect-sd_bus_setting_add_int.c ftests.c
@@ -191,6 +192,7 @@ check_PROGRAMS = \
 	test070 \
 	test071 \
 	test072 \
+	test073 \
 	sudo1000 \
 	sudo1001 \
 	sudo1002 \
@@ -290,7 +292,8 @@ EXTRA_DIST_CFGS = \
 	071-cause-cgroup_data.json \
 	071-cause-cgroup_data.expected \
 	072-cause-cgroup_data2.json.token \
-	072-cause-cgroup_data2.expected.token
+	072-cause-cgroup_data2.expected.token \
+	073-effect-rest_server.json
 
 EXTRA_DIST_H_FILES = \
 	ftests.h
