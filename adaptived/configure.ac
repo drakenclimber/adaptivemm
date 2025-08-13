@@ -68,6 +68,12 @@ AC_CHECK_LIB([json-c], [json_object_object_get_ex], [],
 AC_CHECK_HEADERS([json-c/json.h], [],
 		 [AC_MSG_ERROR([please install the json-c development package])])
 
+AC_CHECK_LIB([curl], [curl_easy_init], [],
+	     [AC_MSG_ERROR([please install curl])])
+
+AC_CHECK_HEADERS([curl/curl.h], [],
+		 [AC_MSG_ERROR([please install the curl development package])])
+
 AC_ARG_ENABLE([restserver],
 	      [AS_HELP_STRING([--enable-restserver],[enable rest server [default=yes]])],
 	      [
