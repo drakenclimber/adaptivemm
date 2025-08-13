@@ -81,6 +81,7 @@ struct adaptived_cause {
 	 * at the end of each adaptived_loop() loop
 	 */
 	struct shared_data *sdata;
+	pthread_mutex_t sdata_mutex;
 
 	/* private data store for each cause plugin */
 	void *data;

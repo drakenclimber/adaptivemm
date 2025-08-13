@@ -239,6 +239,8 @@ API int adaptived_sdata_to_json(struct adaptived_cause * const cse,
 	if (!parent_obj)
 		return -ENOMEM;
 
+	pthread_mutex_lock(&cse->sdata_mutex);
+
 	cur = cse->sdata;
 	stype = cur->type;
 
@@ -271,11 +273,15 @@ API int adaptived_sdata_to_json(struct adaptived_cause * const cse,
 		cur = cur->next;
 	}
 
+	pthread_mutex_unlock(&cse->sdata_mutex);
+
 	*json_obj = parent_obj;
 
 	return ret;
 
 err:
+	pthread_mutex_unlock(&cse->sdata_mutex);
+
 	if (parent_obj)
 		json_object_put(parent_obj);
 
@@ -317,6 +323,8 @@ API int adaptived_write_shared_data(struct adaptived_cause * const cse,
 	sdata->flags = flags;
 	sdata->next = NULL;
 
+	pthread_mutex_lock(&cse->sdata_mutex);
+
 	if (cse->sdata == NULL) {
 		cse->sdata = sdata;
 	} else {
@@ -331,6 +339,8 @@ API int adaptived_write_shared_data(struct adaptived_cause * const cse,
 
 		prev->next = sdata;
 	}
+
+	pthread_mutex_unlock(&cse->sdata_mutex);
 
 	return 0;
 }
@@ -347,22 +357,30 @@ API int adaptived_update_shared_data(struct adaptived_cause * const cse, int ind
 	if (index < 0)
 		return -EINVAL;
 
+	pthread_mutex_lock(&cse->sdata_mutex);
+
 	sdata = cse->sdata;
 
-	if (sdata == NULL)
+	if (sdata == NULL) {
+		pthread_mutex_unlock(&cse->sdata_mutex);
 		return -ERANGE;
+	}
 
 	while (index > 0) {
-		if (sdata->next == NULL)
+		if (sdata->next == NULL) {
+			pthread_mutex_unlock(&cse->sdata_mutex);
 			return -ERANGE;
+		}
 
 		sdata = sdata->next;
 		index--;
 	}
 
-	if (sdata->type != type)
+	if (sdata->type != type) {
+		pthread_mutex_unlock(&cse->sdata_mutex);
 		/* Don't allow the changing of the data type */
 		return -EINVAL;
+	}
 
 	/*
 	 * It's up to the user to ensure that the old data field is properly freed and not
@@ -371,16 +389,20 @@ API int adaptived_update_shared_data(struct adaptived_cause * const cse, int ind
 	sdata->data = data;
 	sdata->flags = flags;
 
+	pthread_mutex_unlock(&cse->sdata_mutex);
+
 	return 0;
 }
 
-API int adaptived_get_shared_data_cnt(const struct adaptived_cause * const cse)
+API int adaptived_get_shared_data_cnt(struct adaptived_cause * const cse)
 {
 	struct shared_data *sdata = NULL;
 	int cnt = 0;
 
 	if (cse == NULL)
 		return 0;
+
+	pthread_mutex_lock(&cse->sdata_mutex);
 
 	sdata = cse->sdata;
 
@@ -389,10 +411,12 @@ API int adaptived_get_shared_data_cnt(const struct adaptived_cause * const cse)
 		sdata = sdata->next;
 	}
 
+	pthread_mutex_unlock(&cse->sdata_mutex);
+
 	return cnt;
 }
 
-API int adaptived_get_shared_data(const struct adaptived_cause * const cse, int index,
+API int adaptived_get_shared_data(struct adaptived_cause * const cse, int index,
 				  enum adaptived_sdata_type * const type, void **data,
 				  uint32_t * const flags)
 {
@@ -404,14 +428,20 @@ API int adaptived_get_shared_data(const struct adaptived_cause * const cse, int 
 	if (index < 0)
 		return -EINVAL;
 
+	pthread_mutex_lock(&cse->sdata_mutex);
+
 	sdata = cse->sdata;
 
-	if (sdata == NULL)
+	if (sdata == NULL) {
+		pthread_mutex_unlock(&cse->sdata_mutex);
 		return -ERANGE;
+	}
 
 	while (index > 0) {
-		if (sdata->next == NULL)
+		if (sdata->next == NULL) {
+			pthread_mutex_unlock(&cse->sdata_mutex);
 			return -ERANGE;
+		}
 
 		sdata = sdata->next;
 		index--;
@@ -420,6 +450,8 @@ API int adaptived_get_shared_data(const struct adaptived_cause * const cse, int 
 	*type = sdata->type;
 	*data = sdata->data;
 	*flags = sdata->flags;
+
+	pthread_mutex_unlock(&cse->sdata_mutex);
 
 	return 0;
 }
@@ -435,6 +467,8 @@ API void free_shared_data(struct adaptived_cause * const cse, bool force_delete)
 
 	if (cse->sdata == NULL)
 		return;
+
+	pthread_mutex_lock(&cse->sdata_mutex);
 
 	cur = cse->sdata;
 
@@ -494,4 +528,5 @@ API void free_shared_data(struct adaptived_cause * const cse, bool force_delete)
 	}
 
 	cse->sdata = first_valid;
+	pthread_mutex_unlock(&cse->sdata_mutex);
 }

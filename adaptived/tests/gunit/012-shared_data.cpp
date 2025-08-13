@@ -37,6 +37,7 @@ class SharedDataTest : public ::testing::Test {
 static void populate_cause(struct adaptived_cause * const cse, int idx)
 {
 	char *name;
+	int ret;
 
 	name = (char *)malloc(sizeof(char) * 16);
 	ASSERT_NE(name, nullptr);
@@ -48,6 +49,9 @@ static void populate_cause(struct adaptived_cause * const cse, int idx)
 	cse->fns = NULL;
 	cse->sdata = NULL;
 	cse->data = NULL;
+
+	ret = pthread_mutex_init(&cse->sdata_mutex, NULL);
+	ASSERT_EQ(ret, 0);
 }
 
 static void free_sdata(void * const data)
