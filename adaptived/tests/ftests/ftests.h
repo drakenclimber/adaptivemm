@@ -87,4 +87,6 @@ int build_systemd_cgroup_path(const char * const cgrp, char ** path);
 int build_systemd_memory_max_file(const char * const cgrp_path, char **file_path);
 int parse_token_file(const char * const token_file, const char * const out_file);
 
+int curl(const char * const url, char **response);
+
 #endif /* __ADAPTIVED_FTESTS_H */

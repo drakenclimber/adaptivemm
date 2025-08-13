@@ -25,6 +25,7 @@
  *
  */
 
+#include <curl/curl.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -40,6 +41,11 @@
 
 #define AUTOMAKE_PASSED 0
 #define AUTOMAKE_HARD_ERROR 99
+
+struct curl_memory_struct {
+  char *memory;
+  size_t size;
+};
 
 void delete_file(const char * const filename)
 {
@@ -878,6 +884,82 @@ err:
 
 	if (line)
 		free(line);
+
+	return ret;
+}
+
+static size_t curl_callback(void *contents, size_t size, size_t nmemb, void *userp)
+{
+	struct curl_memory_struct *mem = (struct curl_memory_struct *)userp;
+	size_t realsize = size * nmemb;
+	char *ptr;
+
+	ptr = realloc(mem->memory, mem->size + realsize + 1);
+	if (!ptr) {
+		adaptived_err("curl realloc() failed\n");
+		return 0;
+	}
+
+	mem->memory = ptr;
+	memcpy(&(mem->memory[mem->size]), contents, realsize);
+	mem->size += realsize;
+	mem->memory[mem->size] = 0;
+
+	return realsize;
+}
+
+int curl(const char * const url, char **response)
+{
+	struct curl_memory_struct chunk;
+	CURLcode result;
+	long http_code;
+	int ret = 0;
+	CURL *curl;
+
+	if (!response)
+		return -EINVAL;
+	*response = NULL;
+
+	chunk.memory = malloc(1);
+	if (!chunk.memory)
+		return -ENOMEM;
+	chunk.size = 0;
+
+	curl_global_init(CURL_GLOBAL_DEFAULT);
+
+	curl = curl_easy_init();
+	if (!curl)
+		return -ENOMEM;
+
+	curl_easy_setopt(curl, CURLOPT_URL, url);
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_callback);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
+
+	result = curl_easy_perform(curl);
+
+	if (result != CURLE_OK) {
+		adaptived_err("curl failed: %s\n", curl_easy_strerror(result));
+		ret = -EINVAL;
+		goto err;
+	}
+
+	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+	if (http_code >= 400) {
+		adaptived_err("curl returned: %ld\n", http_code);
+		ret = -EIO;
+		goto err;
+	}
+
+	*response = chunk.memory;
+
+err:
+	curl_easy_cleanup(curl);
+
+	if (ret)
+		free(chunk.memory);
+
+	curl_global_cleanup();
 
 	return ret;
 }
