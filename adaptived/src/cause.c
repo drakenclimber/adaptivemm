@@ -271,6 +271,7 @@ API int adaptived_cause_add_int_arg(struct adaptived_cause * const cse, const ch
 struct adaptived_cause *cause_init(const char * const name)
 {
 	struct adaptived_cause *cse = NULL;
+	int ret;
 
 	cse = malloc(sizeof(struct adaptived_cause));
 	if (!cse)
@@ -283,6 +284,12 @@ struct adaptived_cause *cause_init(const char * const name)
 		goto error;
 
 	strcpy(cse->name, name);
+
+	ret = pthread_mutex_init(&cse->sdata_mutex, NULL);
+	if (ret) {
+		adaptived_err("Failed to init shared data mutex: %d\n", ret);
+		goto error;
+	}
 
 	return cse;
 error:

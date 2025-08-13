@@ -537,7 +537,7 @@ int adaptived_update_shared_data(struct adaptived_cause * const cse, int index,
  *
  * @return number of shared data objects
  */
-int adaptived_get_shared_data_cnt(const struct adaptived_cause * const cse);
+int adaptived_get_shared_data_cnt(struct adaptived_cause * const cse);
 
 /**
  * Retrieve one shared data object from the cause
@@ -550,7 +550,7 @@ int adaptived_get_shared_data_cnt(const struct adaptived_cause * const cse);
  * @note You do not need to free the data in the shared data object.  adaptived will
  * 	 automatically do that at the end of each main processing loop
  */
-int adaptived_get_shared_data(const struct adaptived_cause * const cse, int index,
+int adaptived_get_shared_data(struct adaptived_cause * const cse, int index,
 			      enum adaptived_sdata_type * const type, void **data,
 			      uint32_t * const flags);
 

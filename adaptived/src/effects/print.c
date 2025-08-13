@@ -210,7 +210,7 @@ static void print_cgroup_setting_and_value(const struct print_opts * const opts,
 
 static void print_shared_data(const struct print_opts * const opts)
 {
-	const struct adaptived_cause *cse = opts->cse;
+	struct adaptived_cause *cse = (struct adaptived_cause *)opts->cse;
 	enum adaptived_sdata_type type;
 	void *read_data;
 	int ret, cnt, i;
